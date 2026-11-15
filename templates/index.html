@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Deadlock Sentinel</title>
+  <meta name="description" content="Automatically detects actual and potential deadlocks among processes and suggests verified resolution strategies.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='50,4 92,27 92,73 50,96 8,73 8,27' fill='%2305070f' stroke='%2322e5ff' stroke-width='6'/%3E%3Ccircle cx='50' cy='50' r='16' fill='none' stroke='%23ff3df2' stroke-width='7'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <canvas id="bg-canvas"></canvas>
+  <div class="grid-floor"></div>
+  <div class="scanlines"></div>
+  <div id="alert-flash"></div>
+
+  <!-- ===== Boot sequence ===== -->
+  <div id="boot" title="Click to skip">
+    <div class="boot-inner">
+      <div class="boot-logo">
+        <svg viewBox="0 0 100 100" class="hex"><polygon points="50,4 92,27 92,73 50,96 8,73 8,27"/><circle cx="50" cy="50" r="14"/><path d="M50 22 L50 36 M50 64 L50 78 M26 50 L36 50 M64 50 L74 50"/></svg>
+      </div>
+      <div id="boot-lines" class="boot-lines"></div>
+      <div class="boot-bar"><span></span></div>
+    </div>
+  </div>
+
+  <!-- ===== Header ===== -->
+  <header class="topbar">
+    <div class="brand">
+      <svg viewBox="0 0 100 100" class="hex small"><polygon points="50,4 92,27 92,73 50,96 8,73 8,27"/><circle cx="50" cy="50" r="14"/></svg>
+      <div>
+        <h1>DEADLOCK<span>//</span>SENTINEL</h1>
+        <p>Automated Deadlock Detection Tool · process dependencies → circular wait → resolution strategies</p>
+      </div>
+    </div>
+    <div id="sys-status" class="status-pill idle"><i></i><span>SYSTEM IDLE</span></div>
+    <div class="top-actions">
+      <button class="btn ghost" id="btn-save" title="Save scenario as JSON">⤓ Save</button>
+      <label class="btn ghost" title="Load scenario JSON">⤒ Load<input type="file" id="file-load" accept=".json" hidden></label>
+      <button class="btn neon" id="btn-report">⎙ Report</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- ===== MODULE 1 · Control Deck ===== -->
+    <section class="panel deck" aria-label="Scenario input">
+      <div class="panel-head"><span class="tag">M1</span><h2>System Input</h2></div>
+
+      <details class="field trace-in" id="trace-box">
+        <summary>Process activity trace <small>· auto-detect event by event</small></summary>
+        <p class="desc">One event per line: <code>P1 acquire Printer</code>, <code>P1 release Printer</code>,
+          <code>resource Disk 2</code>, <code>P1 claims Disk 2</code>. Detection runs after every event.</p>
+        <textarea id="trace-text" rows="8" spellcheck="false" placeholder="resource Printer 1&#10;P1 acquire Printer&#10;P2 acquire Printer"></textarea>
+        <div class="row">
+          <button class="btn mini" id="btn-trace-example">Example</button>
+          <button class="btn neon" id="btn-trace">▶ Analyze trace</button>
+        </div>
+        <div id="trace-summary" class="cond-summary"></div>
+        <ol id="timeline" class="timeline"></ol>
+      </details>
+
+      <div class="field">
+        <label>Scenario</label>
+        <div class="row">
+          <select id="scenario-select"><option value="">— custom —</option></select>
+          <button class="btn icon" id="btn-random" title="Random valid scenario">🎲</button>
+          <button class="btn icon" id="btn-clear" title="Clear system">⟲</button>
+        </div>
+        <p id="scenario-desc" class="desc"></p>
+      </div>
+
+      <div class="field">
+        <div class="field-head"><label>Resources</label><button class="btn mini" id="btn-add-res">+ Resource</button></div>
+        <div id="res-list" class="res-list"></div>
+      </div>
+
+      <div class="field">
+        <div class="field-head">
+          <div class="tabs" role="tablist">
+            <button class="tab active" data-matrix="allocation" role="tab">Allocation <small>holds</small></button>
+            <button class="tab" data-matrix="request" role="tab">Request <small>waits for</small></button>
+            <button class="tab" data-matrix="max" role="tab" title="Declared maximum claim, used by Banker's avoidance">Max <small>claim</small></button>
+          </div>
+          <button class="btn mini" id="btn-add-proc">+ Process</button>
+        </div>
+        <div class="matrix-wrap"><table id="matrix" class="matrix"></table></div>
+      </div>
+
+      <div id="errors" class="errors" hidden></div>
+    </section>
+
+    <!-- ===== Graph viewport (Module 3 visual) ===== -->
+    <section class="panel stage-panel" aria-label="Graph">
+      <div class="panel-head">
+        <span class="tag">M2</span><h2>Dependency Graph</h2>
+        <div class="seg" id="view-toggle">
+          <button class="active" data-view="rag" title="Resource Allocation Graph">RAG</button>
+          <button data-view="wfg" title="Wait-For Graph: process dependencies">WFG</button>
+          <button data-view="lock" title="Resource-acquisition (lock-order) graph: potential circular waits">LOCK ORDER</button>
+        </div>
+      </div>
+      <div class="stage-tools">
+        <button class="btn neon" id="btn-scan">▶ Run Detection Scan</button>
+        <label class="speed">Speed <input type="range" id="speed" min="0.5" max="4" step="0.5" value="1.5"></label>
+      </div>
+      <div class="stage" id="stage">
+        <svg id="graph" viewBox="0 0 800 560" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="hud" id="hud" hidden>
+          <div class="hud-row"><span class="hud-k">PASS</span><span id="hud-pass">0</span></div>
+          <div class="hud-row"><span class="hud-k">WORK</span><span id="hud-work" class="vec"></span></div>
+          <div class="hud-msg" id="hud-msg"></div>
+        </div>
+        <div class="empty" id="empty-msg" hidden>Add resources and processes, or pick a scenario.</div>
+      </div>
+      <div class="legend">
+        <span><i class="lg proc"></i>Process</span>
+        <span><i class="lg res"></i>Resource (● held ○ free)</span>
+        <span><i class="lg assign"></i>Holds</span>
+        <span><i class="lg request"></i>Waits for</span>
+        <span><i class="lg dead"></i>Deadlock cycle</span>
+        <span><i class="dot ok"></i>Completes</span>
+        <span><i class="dot bad"></i>Deadlocked</span>
+        <span><i class="dot warn"></i>Blocked</span>
+        <span><i class="dot risk"></i>At risk (potential)</span>
+      </div>
+    </section>
+
+    <!-- ===== Module 2 output · Analysis console ===== -->
+    <section class="panel console" aria-label="Analysis">
+      <div class="panel-head"><span class="tag">M2</span><h2>Detection Engine</h2></div>
+      <div id="verdict" class="verdict idle">
+        <div class="verdict-icon"></div>
+        <div><div class="verdict-title">AWAITING INPUT</div><div class="verdict-sub">Detection runs automatically on every change</div></div>
+      </div>
+      <div class="block" id="findings-block" hidden><h3>Findings</h3><ul id="findings" class="findings"></ul></div>
+      <div class="stats">
+        <div class="stat ok"><b id="st-ok">0</b><span>Completes</span></div>
+        <div class="stat bad"><b id="st-bad">0</b><span>Deadlocked</span></div>
+        <div class="stat warn"><b id="st-warn">0</b><span>Blocked</span></div>
+      </div>
+      <div class="block" id="cycles-block" hidden><h3>Circular wait</h3><div id="cycles"></div></div>
+      <div class="block" id="order-block" hidden><h3>Completion order</h3><div id="order" class="chips"></div></div>
+      <div class="block"><h3>Explanation</h3><ul id="explain" class="explain"></ul></div>
+      <details class="block trace-box" open>
+        <summary>Why? Deadlock characterization <small>(four necessary conditions)</small></summary>
+        <div id="conditions" class="conds"></div>
+        <p id="cond-summary" class="cond-summary"></p>
+      </details>
+      <details class="block trace-box" id="algo-trace">
+        <summary>Algorithm trace <small>(Work / Finish)</small></summary>
+        <div class="trace-wrap"><table id="trace" class="trace"></table></div>
+      </details>
+    </section>
+
+    <!-- ===== Module 3 · Handling deadlocks ===== -->
+    <section class="panel lab" id="lab" aria-label="Resolution strategies">
+      <div class="panel-head">
+        <span class="tag">M3</span><h2>Resolution Strategies</h2>
+        <div class="tabs topic-tabs" role="tablist">
+          <button class="tab active" data-topic="recovery" role="tab">Suggested <i class="tb" id="tb-recovery"></i></button>
+          <button class="tab" data-topic="prevention" role="tab">Prevention <i class="tb" id="tb-prevention"></i></button>
+          <button class="tab" data-topic="avoidance" role="tab">Avoidance <i class="tb" id="tb-avoidance"></i></button>
+          <button class="tab" data-topic="starvation" role="tab">Starvation <i class="tb" id="tb-starvation"></i></button>
+        </div>
+      </div>
+
+      <!-- Prevention -->
+      <div class="topic" id="topic-prevention" hidden>
+        <p class="theory"><b>Prevention</b> makes deadlock impossible by ensuring that at least <b>one of the four necessary conditions can never hold</b>.
+          Each protocol below is applied to a copy of the current state and re-checked by the detection engine.</p>
+        <div id="prev-list" class="prev-list"></div>
+        <div class="compare" id="prev-compare" hidden></div>
+      </div>
+
+      <!-- Avoidance -->
+      <div class="topic" id="topic-avoidance" hidden>
+        <p class="theory"><b>Avoidance</b> needs each process's <b>maximum claim</b> in advance (edit it in the <b>Max</b> tab of the Control Deck).
+          A request is granted only if the system stays in a <b>safe state</b>, i.e. a safe sequence exists. Banker's algorithm: <code>Need = Max − Allocation</code>.</p>
+        <div class="av-grid">
+          <div class="av-col">
+            <div id="av-verdict" class="av-verdict"></div>
+            <div class="block"><h3>Safe sequence</h3><div id="av-seq" class="chips"></div></div>
+            <div class="block"><h3>Need = Max − Allocation</h3><div class="matrix-wrap"><table id="av-need" class="matrix ro"></table></div></div>
+          </div>
+          <div class="av-col">
+            <div class="block"><h3>State space</h3><svg id="av-sets" viewBox="0 0 300 190" class="sets"></svg>
+              <p class="desc">Safe ⇒ no deadlock. Unsafe ⇒ deadlock is <i>possible</i>. Every deadlocked state is unsafe.</p></div>
+            <details class="block trace-box"><summary>Safety algorithm trace <small>(Work / Need)</small></summary>
+              <div class="trace-wrap"><table id="av-trace" class="trace"></table></div></details>
+          </div>
+          <div class="av-col">
+            <div class="block">
+              <h3>Resource-request algorithm</h3>
+              <div class="req-form">
+                <label>Process <select id="rq-proc"></select></label>
+                <div id="rq-vec" class="rq-vec"></div>
+                <button class="btn neon" id="btn-rq">⚖ Check request</button>
+              </div>
+              <ol id="rq-steps" class="rq-steps"></ol>
+              <div id="rq-actions" class="rq-actions" hidden><button class="btn neon" id="btn-rq-apply">✓ Grant &amp; apply</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recovery -->
+      <div class="topic" id="topic-recovery">
+        <p class="theory" id="res-advice">The tool suggests strategies that match what it detected. For an <b>actual deadlock</b> it offers <b>recovery</b>
+          (terminate, preempt, roll back). For a <b>potential deadlock</b> it offers <b>mitigation</b> (enforce an acquisition order, restore a safe state).
+          Every strategy is simulated on a copy of the system and verified by the detection engine.</p>
+        <div id="lab-empty" class="lab-empty">No deadlock and no risk → nothing to resolve. ✔</div>
+        <div id="options" class="options"></div>
+        <div class="compare" id="rec-compare" hidden></div>
+      </div>
+
+      <!-- Starvation -->
+      <div class="topic" id="topic-starvation" hidden>
+        <p class="theory"><b>Starvation</b> is indefinite postponement: the system makes progress but one process never does. In recovery, if the
+          same process is always the cheapest victim it can be rolled back forever. Fix: <b>aging</b>, counting how often a process was chosen in its cost factor.</p>
+        <div class="st-grid">
+          <div class="block">
+            <h3>Victim history <small>· this session</small></h3>
+            <div id="st-history" class="st-history"></div>
+            <p class="desc">Each time you apply a recovery, its victims are recorded here. Each previous selection adds <b id="st-pen">60</b> to that
+              process's victim cost, and after <b id="st-max">3</b> selections it is protected.</p>
+            <button class="btn mini" id="btn-st-reset">⟲ Reset history</button>
+          </div>
+          <div class="block">
+            <h3>Recurring-deadlock simulation <small>· same deadlock, <span id="st-rounds">6</span> rounds</small></h3>
+            <div id="st-sim" class="st-sim"></div>
+            <p id="st-summary" class="cond-summary"></p>
+          </div>
+        </div>
+        <div class="block">
+          <h3>Where else starvation appears</h3>
+          <ul class="explain">
+            <li class="warn">Hold-and-wait prevention: a process needing several popular resources at once may wait indefinitely.</li>
+            <li class="warn">Resource preemption / rollback: the same victim may be preempted again and again.</li>
+            <li class="ok">Deadlock vs starvation: in a deadlock <i>no</i> process in the set progresses; with starvation the others keep running.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="{{ url_for('static', filename='js/api.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/state.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/graph.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/results.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
