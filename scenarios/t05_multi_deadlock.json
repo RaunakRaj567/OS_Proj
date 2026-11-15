@@ -1,0 +1,57 @@
+{
+  "id": "t05_multi_deadlock",
+  "name": "T5 · Multi-instance deadlock",
+  "category": "multi",
+  "description": "Both units of R1 and the only R2 are held by processes that wait on each other.",
+  "resources": [
+    "R1",
+    "R2"
+  ],
+  "total": [
+    2,
+    1
+  ],
+  "processes": [
+    "P1",
+    "P2",
+    "P3"
+  ],
+  "allocation": [
+    [
+      1,
+      0
+    ],
+    [
+      0,
+      1
+    ],
+    [
+      1,
+      0
+    ]
+  ],
+  "request": [
+    [
+      0,
+      1
+    ],
+    [
+      1,
+      0
+    ],
+    [
+      0,
+      1
+    ]
+  ],
+  "expected": {
+    "deadlocked": [
+      "P1",
+      "P2",
+      "P3"
+    ],
+    "blocked": [],
+    "completion_order": [],
+    "valid": true
+  }
+}

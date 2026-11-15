@@ -1,0 +1,124 @@
+{
+  "id": "t13_bankers_safe",
+  "name": "T13 · Banker's algorithm: safe state",
+  "category": "avoidance",
+  "description": "Textbook Banker's example: resources A=10, B=5, C=7 with declared Max claims. A safe sequence exists, so the state can never deadlock. Try P1 requesting (1,0,2) in the Avoidance tab — it is granted.",
+  "resources": [
+    "A",
+    "B",
+    "C"
+  ],
+  "total": [
+    10,
+    5,
+    7
+  ],
+  "processes": [
+    "P0",
+    "P1",
+    "P2",
+    "P3",
+    "P4"
+  ],
+  "allocation": [
+    [
+      0,
+      1,
+      0
+    ],
+    [
+      2,
+      0,
+      0
+    ],
+    [
+      3,
+      0,
+      2
+    ],
+    [
+      2,
+      1,
+      1
+    ],
+    [
+      0,
+      0,
+      2
+    ]
+  ],
+  "request": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ]
+  ],
+  "max": [
+    [
+      7,
+      5,
+      3
+    ],
+    [
+      3,
+      2,
+      2
+    ],
+    [
+      9,
+      0,
+      2
+    ],
+    [
+      2,
+      2,
+      2
+    ],
+    [
+      4,
+      3,
+      3
+    ]
+  ],
+  "expected": {
+    "deadlocked": [],
+    "blocked": [],
+    "completion_order": [
+      "P0",
+      "P1",
+      "P2",
+      "P3",
+      "P4"
+    ],
+    "valid": true,
+    "safe": true,
+    "safe_sequence": [
+      "P1",
+      "P3",
+      "P4",
+      "P0",
+      "P2"
+    ]
+  }
+}

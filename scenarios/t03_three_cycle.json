@@ -1,0 +1,65 @@
+{
+  "id": "t03_three_cycle",
+  "name": "T3 · Three-process circular wait",
+  "category": "deadlock",
+  "description": "P1 → P2 → P3 → P1: each waits for the resource the next one holds.",
+  "resources": [
+    "R1",
+    "R2",
+    "R3"
+  ],
+  "total": [
+    1,
+    1,
+    1
+  ],
+  "processes": [
+    "P1",
+    "P2",
+    "P3"
+  ],
+  "allocation": [
+    [
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      1
+    ]
+  ],
+  "request": [
+    [
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      1
+    ],
+    [
+      1,
+      0,
+      0
+    ]
+  ],
+  "expected": {
+    "deadlocked": [
+      "P1",
+      "P2",
+      "P3"
+    ],
+    "blocked": [],
+    "completion_order": [],
+    "valid": true
+  }
+}

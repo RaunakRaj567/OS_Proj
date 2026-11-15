@@ -1,0 +1,35 @@
+{
+  "id": "t11_invalid_overalloc",
+  "name": "T11 · Invalid: over-allocated resource",
+  "category": "invalid",
+  "description": "R1 has 1 instance but two processes hold it. Validation must reject this before detection.",
+  "resources": [
+    "R1"
+  ],
+  "total": [
+    1
+  ],
+  "processes": [
+    "P1",
+    "P2"
+  ],
+  "allocation": [
+    [
+      1
+    ],
+    [
+      1
+    ]
+  ],
+  "request": [
+    [
+      0
+    ],
+    [
+      0
+    ]
+  ],
+  "expected": {
+    "valid": false
+  }
+}

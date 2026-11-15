@@ -1,0 +1,79 @@
+{
+  "id": "t07_printer_scanner",
+  "name": "T7 · Deadlock + blocked process",
+  "category": "deadlock",
+  "description": "P1 and P2 deadlock over Printer/Scanner. P4 waits on P1's Printer: blocked BY the deadlock but not in the cycle. P3 completes.",
+  "resources": [
+    "Printer",
+    "Scanner",
+    "Disk"
+  ],
+  "total": [
+    1,
+    1,
+    2
+  ],
+  "processes": [
+    "P1",
+    "P2",
+    "P3",
+    "P4"
+  ],
+  "allocation": [
+    [
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      1
+    ]
+  ],
+  "request": [
+    [
+      0,
+      1,
+      0
+    ],
+    [
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0
+    ]
+  ],
+  "expected": {
+    "deadlocked": [
+      "P1",
+      "P2"
+    ],
+    "blocked": [
+      "P4"
+    ],
+    "completion_order": [
+      "P3"
+    ],
+    "valid": true
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "id": "t02_two_process",
+  "name": "T2 · Classic two-process deadlock",
+  "category": "deadlock",
+  "description": "P1 holds R1 and wants R2; P2 holds R2 and wants R1.",
+  "resources": [
+    "R1",
+    "R2"
+  ],
+  "total": [
+    1,
+    1
+  ],
+  "processes": [
+    "P1",
+    "P2"
+  ],
+  "allocation": [
+    [
+      1,
+      0
+    ],
+    [
+      0,
+      1
+    ]
+  ],
+  "request": [
+    [
+      0,
+      1
+    ],
+    [
+      1,
+      0
+    ]
+  ],
+  "expected": {
+    "deadlocked": [
+      "P1",
+      "P2"
+    ],
+    "blocked": [],
+    "completion_order": [],
+    "valid": true
+  }
+}

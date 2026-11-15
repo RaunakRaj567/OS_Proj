@@ -1,0 +1,114 @@
+{
+  "id": "t10_db_transactions",
+  "name": "T10 · Database lock deadlock (two groups)",
+  "category": "deadlock",
+  "description": "Five transactions on table locks: T1↔T2 deadlock on Orders/Users, T3↔T4 on Logs/Cache, T5 finishes.",
+  "resources": [
+    "Orders",
+    "Users",
+    "Logs",
+    "Cache",
+    "Index"
+  ],
+  "total": [
+    1,
+    1,
+    1,
+    1,
+    2
+  ],
+  "processes": [
+    "T1",
+    "T2",
+    "T3",
+    "T4",
+    "T5"
+  ],
+  "allocation": [
+    [
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  ],
+  "request": [
+    [
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  ],
+  "expected": {
+    "deadlocked": [
+      "T1",
+      "T2",
+      "T3",
+      "T4"
+    ],
+    "blocked": [],
+    "completion_order": [
+      "T5"
+    ],
+    "valid": true
+  }
+}

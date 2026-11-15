@@ -1,0 +1,53 @@
+{
+  "id": "t09_after_recovery",
+  "name": "T9 · T3 after terminating P1",
+  "category": "recovery",
+  "description": "The T3 deadlock after P1 was terminated: R1 is free, so P3 finishes and releases R3 for P2.",
+  "resources": [
+    "R1",
+    "R2",
+    "R3"
+  ],
+  "total": [
+    1,
+    1,
+    1
+  ],
+  "processes": [
+    "P2",
+    "P3"
+  ],
+  "allocation": [
+    [
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      1
+    ]
+  ],
+  "request": [
+    [
+      0,
+      0,
+      1
+    ],
+    [
+      1,
+      0,
+      0
+    ]
+  ],
+  "expected": {
+    "deadlocked": [],
+    "blocked": [],
+    "completion_order": [
+      "P3",
+      "P2"
+    ],
+    "valid": true
+  }
+}

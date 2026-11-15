@@ -1,0 +1,67 @@
+{
+  "id": "t04_cycle_no_deadlock",
+  "name": "T4 · Cycle but NO deadlock (multi-instance)",
+  "category": "multi",
+  "description": "The graph has a cycle P1 → P2 → P1, yet P3 and P4 release extra instances. Proves a cycle is not sufficient with multiple instances.",
+  "resources": [
+    "R1",
+    "R2"
+  ],
+  "total": [
+    2,
+    2
+  ],
+  "processes": [
+    "P1",
+    "P2",
+    "P3",
+    "P4"
+  ],
+  "allocation": [
+    [
+      1,
+      0
+    ],
+    [
+      0,
+      1
+    ],
+    [
+      1,
+      0
+    ],
+    [
+      0,
+      1
+    ]
+  ],
+  "request": [
+    [
+      0,
+      1
+    ],
+    [
+      1,
+      0
+    ],
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      0
+    ]
+  ],
+  "expected": {
+    "deadlocked": [],
+    "blocked": [],
+    "completion_order": [
+      "P3",
+      "P4",
+      "P1",
+      "P2"
+    ],
+    "valid": true
+  }
+}

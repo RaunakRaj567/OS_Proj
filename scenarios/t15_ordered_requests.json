@@ -1,0 +1,71 @@
+{
+  "id": "t15_ordered_requests",
+  "name": "T15 · Resource ordering respected",
+  "category": "prevention",
+  "description": "Every process requests resources in increasing order R1 < R2 < R3, so circular wait is impossible: the waits form a chain, never a cycle.",
+  "resources": [
+    "R1",
+    "R2",
+    "R3"
+  ],
+  "total": [
+    1,
+    1,
+    1
+  ],
+  "processes": [
+    "P1",
+    "P2",
+    "P3"
+  ],
+  "allocation": [
+    [
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      1
+    ]
+  ],
+  "request": [
+    [
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0
+    ]
+  ],
+  "expected": {
+    "deadlocked": [],
+    "blocked": [],
+    "completion_order": [
+      "P3",
+      "P2",
+      "P1"
+    ],
+    "valid": true,
+    "safe": true,
+    "safe_sequence": [
+      "P3",
+      "P2",
+      "P1"
+    ]
+  }
+}

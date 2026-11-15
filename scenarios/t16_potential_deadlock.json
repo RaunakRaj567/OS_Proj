@@ -1,0 +1,20 @@
+{
+  "id": "t16_potential_deadlock",
+  "name": "T16 · Potential deadlock (opposite lock order)",
+  "category": "potential",
+  "description": "P1 holds Printer and will need Scanner; P2 holds Scanner and will need Printer. Nobody is blocked yet, so there is no deadlock — but the state is unsafe and the lock order is inverted. The tool flags it BEFORE it happens.",
+  "resources": ["Printer", "Scanner"],
+  "total": [1, 1],
+  "processes": ["P1", "P2", "P3"],
+  "allocation": [[1, 0], [0, 1], [0, 0]],
+  "request": [[0, 0], [0, 0], [0, 0]],
+  "max": [[1, 1], [1, 1], [1, 0]],
+  "expected": {
+    "deadlocked": [],
+    "blocked": [],
+    "completion_order": ["P1", "P2", "P3"],
+    "valid": true,
+    "safe": false,
+    "risk": "high"
+  }
+}

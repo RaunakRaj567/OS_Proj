@@ -1,0 +1,57 @@
+{
+  "id": "t06_wait_chain",
+  "name": "T6 · Waiting chain, no cycle",
+  "category": "basic",
+  "description": "P3 waits for P1, P1 waits for P2 — a chain, not a circle. Everyone finishes.",
+  "resources": [
+    "R1",
+    "R2"
+  ],
+  "total": [
+    1,
+    1
+  ],
+  "processes": [
+    "P1",
+    "P2",
+    "P3"
+  ],
+  "allocation": [
+    [
+      1,
+      0
+    ],
+    [
+      0,
+      1
+    ],
+    [
+      0,
+      0
+    ]
+  ],
+  "request": [
+    [
+      0,
+      1
+    ],
+    [
+      0,
+      0
+    ],
+    [
+      1,
+      0
+    ]
+  ],
+  "expected": {
+    "deadlocked": [],
+    "blocked": [],
+    "completion_order": [
+      "P2",
+      "P1",
+      "P3"
+    ],
+    "valid": true
+  }
+}

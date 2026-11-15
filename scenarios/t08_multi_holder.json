@@ -1,0 +1,53 @@
+{
+  "id": "t08_multi_holder",
+  "name": "T8 · One process holds several resources",
+  "category": "deadlock",
+  "description": "P1 holds R1 and R2 and waits for R3; P2 holds R3 and waits for R1. Victim choice matters for recovery.",
+  "resources": [
+    "R1",
+    "R2",
+    "R3"
+  ],
+  "total": [
+    1,
+    1,
+    1
+  ],
+  "processes": [
+    "P1",
+    "P2"
+  ],
+  "allocation": [
+    [
+      1,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      1
+    ]
+  ],
+  "request": [
+    [
+      0,
+      0,
+      1
+    ],
+    [
+      1,
+      0,
+      0
+    ]
+  ],
+  "expected": {
+    "deadlocked": [
+      "P1",
+      "P2"
+    ],
+    "blocked": [],
+    "completion_order": [],
+    "valid": true
+  }
+}

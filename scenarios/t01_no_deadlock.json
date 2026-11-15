@@ -1,0 +1,47 @@
+{
+  "id": "t01_no_deadlock",
+  "name": "T1 · No deadlock (temporary wait)",
+  "category": "basic",
+  "description": "P2 waits for R1, but P1 needs nothing more, finishes and releases it. Waiting is not deadlock.",
+  "resources": [
+    "R1",
+    "R2"
+  ],
+  "total": [
+    1,
+    1
+  ],
+  "processes": [
+    "P1",
+    "P2"
+  ],
+  "allocation": [
+    [
+      1,
+      0
+    ],
+    [
+      0,
+      0
+    ]
+  ],
+  "request": [
+    [
+      0,
+      0
+    ],
+    [
+      1,
+      0
+    ]
+  ],
+  "expected": {
+    "deadlocked": [],
+    "blocked": [],
+    "completion_order": [
+      "P1",
+      "P2"
+    ],
+    "valid": true
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "id": "t12_invalid_request",
+  "name": "T12 · Invalid: impossible request",
+  "category": "invalid",
+  "description": "P1 holds the only R1 and requests another — Allocation + Request > Total. Invalid input, not deadlock.",
+  "resources": [
+    "R1"
+  ],
+  "total": [
+    1
+  ],
+  "processes": [
+    "P1"
+  ],
+  "allocation": [
+    [
+      1
+    ]
+  ],
+  "request": [
+    [
+      1
+    ]
+  ],
+  "expected": {
+    "valid": false
+  }
+}

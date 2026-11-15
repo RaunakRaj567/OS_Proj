@@ -1,0 +1,64 @@
+{
+  "id": "t14_unsafe_state",
+  "name": "T14 · Unsafe but NOT deadlocked",
+  "category": "avoidance",
+  "description": "12 tape drives. P2 was given a 3rd drive, leaving only 2 free: P1 can still finish, but then neither P0 (needs 5) nor P2 (needs 6) is guaranteed. Unsafe ≠ deadlocked — yet Banker's would have refused that allocation.",
+  "resources": [
+    "Tape"
+  ],
+  "total": [
+    12
+  ],
+  "processes": [
+    "P0",
+    "P1",
+    "P2"
+  ],
+  "allocation": [
+    [
+      5
+    ],
+    [
+      2
+    ],
+    [
+      3
+    ]
+  ],
+  "request": [
+    [
+      0
+    ],
+    [
+      0
+    ],
+    [
+      0
+    ]
+  ],
+  "max": [
+    [
+      10
+    ],
+    [
+      4
+    ],
+    [
+      9
+    ]
+  ],
+  "expected": {
+    "deadlocked": [],
+    "blocked": [],
+    "completion_order": [
+      "P0",
+      "P1",
+      "P2"
+    ],
+    "valid": true,
+    "safe": false,
+    "safe_sequence": [
+      "P1"
+    ]
+  }
+}
